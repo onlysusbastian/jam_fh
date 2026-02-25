@@ -11,6 +11,7 @@ command terms:
     sink - output audio  
 
 **COMMANDS**:
+
     python main.py internal source (internal device as the source)  
     python main.py external source (external device as the source)  
 

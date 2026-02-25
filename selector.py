@@ -8,7 +8,8 @@ class RoutingTarget:
     def __repr__(self):
         return f"<RoutingTarget sink={self.sink_name} source={self.source_name}>"
 
-def select_targets(scored_nodes, mode="auto"):
+
+def select_targets(scored_nodes, mode="auto", scope="both"):
     best_sink = None
     best_source = None
 
@@ -16,7 +17,7 @@ def select_targets(scored_nodes, mode="auto"):
         node = entry.node
         score = entry.score
 
-        # MODE FILTERING (keep minimal for now)
+        # MODE FILTERING
         if mode == "external" and node.bus != "usb":
             continue
         if mode == "internal" and node.bus != "pci":
@@ -32,12 +33,16 @@ def select_targets(scored_nodes, mode="auto"):
             if best_source is None or score > best_source.score:
                 best_source = entry
 
-    if best_sink is None or best_source is None:
-        raise RuntimeError("No valid routing target found")
+    # ✅ Scope filtering happens AFTER the loop
+    if scope == "sink":
+        best_source = None
+
+    elif scope == "source":
+        best_sink = None
 
     return RoutingTarget(
-        sink_id=best_sink.node.id,
-        source_id=best_source.node.id,
-        sink_name=best_sink.node.node_name,
-        source_name=best_source.node.node_name
+        sink_id=best_sink.node.id if best_sink else None,
+        source_id=best_source.node.id if best_source else None,
+        sink_name=best_sink.node.node_name if best_sink else None,
+        source_name=best_source.node.node_name if best_source else None
     )

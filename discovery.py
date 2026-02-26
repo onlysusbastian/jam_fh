@@ -28,7 +28,6 @@ def discover_nodes():
     nodes = []
 
     for obj in data:
-        # Step 1: only PipeWire Nodes
         if obj.get("type") != "PipeWire:Interface:Node":
             continue
 
@@ -37,7 +36,6 @@ def discover_nodes():
 
         media_class = props.get("media.class")
 
-        # Step 2: only Audio nodes
         if not media_class or not media_class.startswith("Audio/"):
             continue
 

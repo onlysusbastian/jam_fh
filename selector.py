@@ -17,23 +17,19 @@ def select_targets(scored_nodes, mode="auto", scope="both"):
         node = entry.node
         score = entry.score
 
-        # MODE FILTERING
         if mode == "external" and node.bus != "usb":
             continue
         if mode == "internal" and node.bus != "pci":
             continue
 
-        # Choose best sink
         if node.media_class == "Audio/Sink":
             if best_sink is None or score > best_sink.score:
                 best_sink = entry
 
-        # Choose best source
         elif node.media_class == "Audio/Source":
             if best_source is None or score > best_source.score:
                 best_source = entry
 
-    # ✅ Scope filtering happens AFTER the loop
     if scope == "sink":
         best_source = None
 

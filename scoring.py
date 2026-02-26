@@ -9,15 +9,12 @@ class DeviceScore:
 def score_node(node):
     score = 0
 
-    # Prefer USB interfaces
     if node.bus == "usb":
         score += 10
 
-    # Internal audio fallback
     elif node.bus == "pci":
         score += 5
 
-    # Channel count bonus
     if node.channels >= 2:
         score += 2
 

@@ -7,7 +7,6 @@ from executor import apply_target
 
 
 def main():
-    # default mode
     mode = "auto"
     scope = "both"
 

@@ -17,35 +17,22 @@ def select_targets(scored_nodes, mode="auto", scope="both"):
         node = entry.node
         score = entry.score
 
-<<<<<<< HEAD
-=======
         
->>>>>>> a1f55635a80e925e43e150d8acba1fcabcc0d34d
         if mode == "external" and node.bus != "usb":
             continue
         if mode == "internal" and node.bus != "pci":
             continue
 
-<<<<<<< HEAD
-=======
         
->>>>>>> a1f55635a80e925e43e150d8acba1fcabcc0d34d
         if node.media_class == "Audio/Sink":
             if best_sink is None or score > best_sink.score:
                 best_sink = entry
 
-<<<<<<< HEAD
-=======
         
->>>>>>> a1f55635a80e925e43e150d8acba1fcabcc0d34d
         elif node.media_class == "Audio/Source":
             if best_source is None or score > best_source.score:
                 best_source = entry
-
-<<<<<<< HEAD
-=======
     
->>>>>>> a1f55635a80e925e43e150d8acba1fcabcc0d34d
     if scope == "sink":
         best_source = None
 

@@ -1,5 +1,7 @@
 from core.discovery import discover_nodes
 from core.main import run
+from monitors.device_monitor import DeviceMonitor
+from core.controller import RoutingController
 
 from PySide6.QtWidgets import (
     QWidget,
@@ -28,25 +30,22 @@ class JamFHApp(QWidget):
         title = QLabel("Jam_FH Audio Middleware")
         main_layout.addWidget(title)
 
-        # -------------------------
         # Devices Section
-        # -------------------------
         devices_group = QGroupBox("Devices")
         devices_layout = QVBoxLayout()
 
         self.device_list = QListWidget()
         devices_layout.addWidget(self.device_list)
 
-        # Refresh button
         self.refresh_button = QPushButton("Refresh Devices")
         self.refresh_button.clicked.connect(self.load_devices)
-        devices_layout.addWidget(self.refresh_button)
 
+        devices_layout.addWidget(self.refresh_button)
         devices_group.setLayout(devices_layout)
 
-        # -------------------------
+        # ---------------------
         # Routing Mode
-        # -------------------------
+        # ---------------------
         mode_group = QGroupBox("Routing Mode")
         mode_layout = QVBoxLayout()
 
@@ -62,9 +61,7 @@ class JamFHApp(QWidget):
 
         mode_group.setLayout(mode_layout)
 
-        # -------------------------
         # Scope
-        # -------------------------
         scope_group = QGroupBox("Scope")
         scope_layout = QHBoxLayout()
 
@@ -76,13 +73,11 @@ class JamFHApp(QWidget):
 
         scope_group.setLayout(scope_layout)
 
-        # -------------------------
         # Apply Button
-        # -------------------------
         self.apply_button = QPushButton("Apply Routing")
         self.apply_button.clicked.connect(self.apply_routing)
 
-        # Add widgets to main layout
+        # Layout Assembly
         main_layout.addWidget(devices_group)
         main_layout.addWidget(mode_group)
         main_layout.addWidget(scope_group)
@@ -90,12 +85,20 @@ class JamFHApp(QWidget):
 
         self.setLayout(main_layout)
 
-        # Load devices
+        # Load devices initially
         self.load_devices()
 
-    # ---------------------------------
-    # Load devices into the list
-    # ---------------------------------
+        # Controller + Monitor
+        self.controller = RoutingController()
+
+        self.monitor = DeviceMonitor(self.controller)
+
+        self.monitor.interface_connected.connect(self.on_interface_connected)
+        self.monitor.interface_disconnected.connect(self.on_interface_removed)
+
+        self.monitor.start()
+
+    # Load Devices
     def load_devices(self):
 
         self.device_list.clear()
@@ -114,9 +117,7 @@ class JamFHApp(QWidget):
             name = f"{node.node_name} ({node.bus})"
             self.device_list.addItem(name)
 
-    # ---------------------------------
-    # Determine routing mode
-    # ---------------------------------
+    # Get Mode
     def get_mode(self):
 
         if self.external_radio.isChecked():
@@ -127,9 +128,7 @@ class JamFHApp(QWidget):
 
         return "auto"
 
-    # ---------------------------------
-    # Determine routing scope
-    # ---------------------------------
+    # Get Scope
     def get_scope(self):
 
         sink = self.sink_checkbox.isChecked()
@@ -146,9 +145,7 @@ class JamFHApp(QWidget):
 
         return "both"
 
-    # ---------------------------------
-    # Apply routing
-    # ---------------------------------
+    # Manual Routing
     def apply_routing(self):
 
         mode = self.get_mode()
@@ -158,3 +155,26 @@ class JamFHApp(QWidget):
             run(mode, scope)
         except Exception as e:
             print(f"Routing error: {e}")
+
+    # Device Event Handlers
+    def on_interface_connected(self):
+
+        print("USB audio interface connected")
+
+        try:
+            run("external", "both")
+        except Exception as e:
+            print(f"Routing error: {e}")
+
+        self.load_devices()
+
+    def on_interface_removed(self):
+
+        print("USB audio interface removed")
+
+        try:
+            run("internal", "both")
+        except Exception as e:
+            print(f"Routing error: {e}")
+
+        self.load_devices()

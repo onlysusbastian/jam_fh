@@ -1,20 +1,18 @@
 import sys
 
-from discovery import discover_nodes
-from scoring import score_nodes
-from selector import select_targets
-from executor import apply_target
+from .discovery import discover_nodes
+from .scoring import score_nodes
+from .selector import select_targets
+from .executor import apply_target
 
 
-def main():
-    mode = "auto"
-    scope = "both"
+def run(mode="auto", scope="both"):
+    """
+    Core routing function used by both CLI and UI
+    """
 
-    if len(sys.argv) > 1:
-         mode = sys.argv[1]
-
-    if len(sys.argv) > 2:
-         scope = sys.argv[2]
+    if scope not in ["sink", "source", "both"]:
+        raise ValueError("scope must be sink, source, or both")
 
     print(f"[audioroute] mode = {mode}")
 
@@ -26,8 +24,24 @@ def main():
 
     apply_target(target)
 
-    if scope not in ["sink", "source", "both"]:
-        raise ValueError("scope must be sink, source, or both")
+    return target
+
+
+def main():
+    """
+    CLI entrypoint
+    """
+
+    mode = "auto"
+    scope = "both"
+
+    if len(sys.argv) > 1:
+        mode = sys.argv[1]
+
+    if len(sys.argv) > 2:
+        scope = sys.argv[2]
+
+    run(mode, scope)
 
 
 if __name__ == "__main__":
